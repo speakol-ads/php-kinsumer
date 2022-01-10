@@ -2,7 +2,6 @@
 <?php
 
 require "vendor/autoload.php";
-require "kinsume.php";
 
 $sdk = new \Aws\Sdk();
 $streamName = getenv('STREAM_NAME');
