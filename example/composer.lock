@@ -737,16 +737,16 @@
         },
         {
             "name": "speakol/php-kinsumer",
-            "version": "v1.0.1",
+            "version": "v1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/speakol-ads/php-kinsumer.git",
-                "reference": "350a647bc4051b4d77f52680dbfac9804a6e3654"
+                "reference": "b6983e0e651d8818377a0894fb522c2cfbea9aad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/speakol-ads/php-kinsumer/zipball/350a647bc4051b4d77f52680dbfac9804a6e3654",
-                "reference": "350a647bc4051b4d77f52680dbfac9804a6e3654",
+                "url": "https://api.github.com/repos/speakol-ads/php-kinsumer/zipball/b6983e0e651d8818377a0894fb522c2cfbea9aad",
+                "reference": "b6983e0e651d8818377a0894fb522c2cfbea9aad",
                 "shasum": ""
             },
             "require": {
@@ -754,16 +754,21 @@
                 "php": ">=8.0"
             },
             "type": "library",
+            "autoload": {
+                "files": [
+                    "./kinsume.php"
+                ]
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "APACHE-v2"
+                "Apache-2.0"
             ],
             "description": "a very simple kinesis stream consumer for PHP 8",
             "support": {
                 "issues": "https://github.com/speakol-ads/php-kinsumer/issues",
-                "source": "https://github.com/speakol-ads/php-kinsumer/tree/v1.0.1"
+                "source": "https://github.com/speakol-ads/php-kinsumer/tree/v1.0.2"
             },
-            "time": "2022-01-10T12:19:32+00:00"
+            "time": "2022-01-10T12:26:15+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
