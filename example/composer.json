@@ -1,0 +1,5 @@
+{
+    "require": {
+        "speakol/php-kinsumer": "^1.0"
+    }
+}

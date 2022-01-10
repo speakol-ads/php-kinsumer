@@ -3,6 +3,11 @@
     "description": "a very simple kinesis stream consumer for PHP 8",
     "type": "library",
     "license": "Apache-2.0",
+    "autoload": {
+        "files": [
+            "./kinsume.php"
+        ]
+    },
     "require": {
         "php": ">=8.0",
         "aws/aws-sdk-php": "^3.209"
