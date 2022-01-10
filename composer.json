@@ -2,7 +2,7 @@
     "name": "speakol/php-kinsumer",
     "description": "a very simple kinesis stream consumer for PHP 8",
     "type": "library",
-    "license": "APACHE-v2",
+    "license": "Apache-2.0",
     "require": {
         "php": ">=8.0",
         "aws/aws-sdk-php": "^3.209"
