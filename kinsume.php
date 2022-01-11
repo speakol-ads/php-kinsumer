@@ -1,19 +1,20 @@
 <?php
 
+use Aws\Kinesis\Exception\KinesisException;
 use Aws\Kinesis\KinesisClient;
 
 /**
  * kinsum - a very simple kinesis consumer
- * 
+ *
  * @param KinesisClient $kinesisClient
  * @param string $streamName
  * @param callable $shardIteratorBuilder(string $shardId)
  * @param callable $dataHandler(string $shardId, string $sequenceNumber, string $data)
  * @param int $recordsLimit getRecords Limit
- * 
+ * @param int $sleep Sleep time in seconds
  * @return void
  */
-function kinsume(KinesisClient $kinesisClient, string $streamName, callable $shardIteratorBuilder, callable $dataHandler, int $recordsLimit = 10000): void
+function kinsume(KinesisClient $kinesisClient, string $streamName, callable $shardIteratorBuilder, callable $dataHandler, int $recordsLimit = 10000, $sleep=10): void
 {
     while (true) {
         $res = $kinesisClient->describeStream(['StreamName' => $streamName]);
@@ -32,10 +33,15 @@ function kinsume(KinesisClient $kinesisClient, string $streamName, callable $sha
                     $shardIterator = $res->get('ShardIterator');
                 }
 
-                $res = $kinesisClient->getRecords([
-                    'Limit' => $recordsLimit,
-                    'ShardIterator' => $shardIterator
-                ]);
+                try {
+                    $res = $kinesisClient->getRecords([
+                        'Limit' => $recordsLimit,
+                        'ShardIterator' => $shardIterator
+                    ]);
+                } catch (KinesisException) {
+                    sleep($sleep);
+                    continue;
+                }
 
                 $shardIterator = $res->get('NextShardIterator');
                 $millisBehindLatest = $res->get('MillisBehindLatest');
@@ -45,6 +51,8 @@ function kinsume(KinesisClient $kinesisClient, string $streamName, callable $sha
                     $seqNumber = $sequenceNumber;
                     call_user_func_array($dataHandler, [$shardId, $seqNumber, $item]);
                 }
+
+                sleep($sleep);
             } while ($millisBehindLatest > 0);
         }
     }
