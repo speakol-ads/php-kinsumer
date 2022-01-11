@@ -14,7 +14,7 @@ use Aws\Kinesis\KinesisClient;
  * @param int $sleep Sleep time in seconds
  * @return void
  */
-function kinsume(KinesisClient $kinesisClient, string $streamName, callable $shardIteratorBuilder, callable $dataHandler, int $recordsLimit = 10000, $sleep=10): void
+function kinsume(KinesisClient $kinesisClient, string $streamName, callable $shardIteratorBuilder, callable $dataHandler, int $recordsLimit = 10000, int $sleep=10): void
 {
     while (true) {
         $res = $kinesisClient->describeStream(['StreamName' => $streamName]);
