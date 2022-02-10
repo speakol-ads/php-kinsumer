@@ -11,49 +11,62 @@ use Aws\Kinesis\KinesisClient;
  * @param callable $shardIteratorBuilder(string $shardId)
  * @param callable $dataHandler(string $shardId, string $sequenceNumber, string $data)
  * @param int $recordsLimit getRecords Limit
- * @param int $sleep Sleep time in seconds
+ * @param callable $exceptionHandler
+ * @param int $sleep
  * @return void
  */
-function kinsume(KinesisClient $kinesisClient, string $streamName, callable $shardIteratorBuilder, callable $dataHandler, int $recordsLimit = 10000, int $sleep=10): void
+function kinsume(
+    KinesisClient $kinesisClient,
+    string $streamName,
+    callable $shardIteratorBuilder,
+    callable $dataHandler,
+    int $recordsLimit = 10000,
+    callable $exceptionHandler = null,
+    int $sleep = 1
+): void
 {
-    while (true) {
-        $res = $kinesisClient->describeStream(['StreamName' => $streamName]);
-        $shardsIds = $res->search('StreamDescription.Shards[].ShardId');
-        foreach ($shardsIds as $shardId) {
-            $seqNumber = "";
-            $shardIterator = "";
-            $millisBehindLatest = 0;
-            do {
-                if (!$shardIterator) {
-                    $iteratorConfigs = array_merge([
-                        'StreamName' => $streamName,
-                        'ShardId' => $shardId,
-                    ], call_user_func_array($shardIteratorBuilder, [$shardId]));
-                    $res = $kinesisClient->getShardIterator($iteratorConfigs);
-                    $shardIterator = $res->get('ShardIterator');
-                }
+    $res = $kinesisClient->describeStream(['StreamName' => $streamName]);
+    $shardsIds = $res->search('StreamDescription.Shards[].ShardId');
 
-                try {
-                    $res = $kinesisClient->getRecords([
-                        'Limit' => $recordsLimit,
-                        'ShardIterator' => $shardIterator
-                    ]);
-                } catch (KinesisException) {
+    foreach ($shardsIds as $shardId) {
+        $seqNumber = "";
+        $shardIterator = "";
+        $millisBehindLatest = 0;
+        do {
+            if (!$shardIterator) {
+                $iteratorConfigs = array_merge([
+                'StreamName' => $streamName,
+                'ShardId' => $shardId,
+            ], call_user_func_array($shardIteratorBuilder, [$shardId]));
+                $res = $kinesisClient->getShardIterator($iteratorConfigs);
+                $shardIterator = $res->get('ShardIterator');
+            }
+
+            try {
+                $res = $kinesisClient->getRecords([
+                    'Limit' => $recordsLimit,
+                    'ShardIterator' => $shardIterator
+                ]);
+            } catch (KinesisException $ex) {
+                if ($exceptionHandler) {
+                    call_user_func_array($exceptionHandler, [$ex]);
+                } else {
                     sleep($sleep);
-                    continue;
                 }
 
-                $shardIterator = $res->get('NextShardIterator');
-                $millisBehindLatest = $res->get('MillisBehindLatest');
+                continue;
+            }
 
-                foreach ($res->search('Records[].[SequenceNumber, Data]') as $data) {
-                    list($sequenceNumber, $item) = $data;
-                    $seqNumber = $sequenceNumber;
-                    call_user_func_array($dataHandler, [$shardId, $seqNumber, $item]);
-                }
+            $shardIterator = $res->get('NextShardIterator');
+            $millisBehindLatest = $res->get('MillisBehindLatest');
 
-                sleep($sleep);
-            } while ($millisBehindLatest > 0);
-        }
+            foreach ($res->search('Records[].[SequenceNumber, Data]') as $data) {
+                list($sequenceNumber, $item) = $data;
+                $seqNumber = $sequenceNumber;
+                call_user_func_array($dataHandler, [$shardId, $seqNumber, $item]);
+            }
+
+            sleep($sleep);
+        } while ($millisBehindLatest > 0);
     }
 }
