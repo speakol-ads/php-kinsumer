@@ -22,7 +22,7 @@ function kinsume(
     callable $dataHandler,
     int $recordsLimit = 10000,
     callable $exceptionHandler = null,
-    int $sleep = 1
+    int $sleep = 5
 ): void
 {
     $res = $kinesisClient->describeStream(['StreamName' => $streamName]);
