@@ -41,7 +41,6 @@ function kinsume(
                 $res = $kinesisClient->getShardIterator($iteratorConfigs);
                 $shardIterator = $res->get('ShardIterator');
             }
-
             try {
                 $res = $kinesisClient->getRecords([
                     'Limit' => $recordsLimit,
@@ -50,8 +49,6 @@ function kinsume(
             } catch (KinesisException $ex) {
                 if ($exceptionHandler) {
                     call_user_func_array($exceptionHandler, [$ex]);
-                } else {
-                    sleep($sleep);
                 }
 
                 continue;
